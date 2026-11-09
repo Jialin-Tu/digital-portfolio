@@ -1,0 +1,22 @@
+node_modules/
+build/
+.DS_Store
+.env
+.env.*
+!.env.example
+dist/
+*.log
+*.local
+/.vite
+/.idea/
+.vscode/
+*.cache
+npm-debug.log
+yarn-error.log
+public/build/
+/*.zip
+
+# Local data from the Phase 1 Express prototype
+server/users.json
+server/sessions.json
+server/posts.json

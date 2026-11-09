@@ -1,0 +1,55 @@
+[
+  {
+    "id": "ecommerce",
+    "title": "E-commerce System",
+    "description": "Developed a backend-based e-commerce system using Spring Boot, MyBatis Plus and MySQL. The system includes product, order and user management features, with REST APIs for communication between the frontend and backend.",
+    "image": "ecommerce",
+    "technologies": [
+      "Java",
+      "Spring Boot",
+      "MyBatis Plus",
+      "MySQL",
+      "REST API",
+      "Vue.js"
+    ]
+  },
+  {
+    "id": "online-mall",
+    "title": "Online Mall",
+    "description": "Developed a web-based online mall using Vue.js and Bootstrap. The project included product browsing, shopping cart and order management features.",
+    "image": "onlineMall",
+    "technologies": [
+      "Vue.js",
+      "Bootstrap",
+      "JavaScript",
+      "HTML",
+      "CSS"
+    ]
+  },
+  {
+    "id": "face-recognition",
+    "title": "Face Recognition Attendance System",
+    "description": "Worked as part of a six-member team to develop a face recognition attendance system. The project focused on using software and computer vision technologies to support attendance management.",
+    "image": "faceRecognition",
+    "technologies": [
+      "Python",
+      "Computer Vision",
+      "Face Recognition",
+      "Software Development",
+      "Teamwork"
+    ]
+  },
+  {
+    "id": "3d-visualisation",
+    "title": "3D Web Visualisation",
+    "description": "Developed 3D web visualisation features during an internship at the Institute of Software, Chinese Academy of Sciences. Worked with Vue.js and Three.js to load 3D models and implement lighting, shadows, camera movement and path-based animation.",
+    "image": "threeD",
+    "technologies": [
+      "Vue.js",
+      "Three.js",
+      "JavaScript",
+      "3D Visualisation",
+      "Animation"
+    ]
+  }
+]
