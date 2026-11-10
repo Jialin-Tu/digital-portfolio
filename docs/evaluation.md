@@ -98,3 +98,15 @@ it. The deleted post stayed gone after a refresh.
 
 These checks were done on the local website. I still need to check the
 same flow after deployment.
+
+## GitHub Pages Deployment
+
+I ran the deployment workflow for commit `017d062`. GitHub Actions
+reported that both the build and deployment succeeded.
+
+I opened the published site directly at `#projects` and selected
+Vue.js in the technology filter. The page showed three projects,
+which matched the expected result.
+
+After deployment, I sent a test message from the live Contact page
+and confirmed that it arrived in my inbox.

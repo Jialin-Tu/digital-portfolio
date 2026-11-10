@@ -77,7 +77,7 @@ separately when it is available.
 - **GitHub:** View my profile and recently updated repositories using the
   public GitHub API.
 - **Contact:** Send an enquiry through FormSubmit or use the direct email
-  link. I confirmed that a test message from the local site arrived.
+  link. I confirmed that test messages from both the local site and the published site arrived in my inbox.
 - **Portfolio FAQ:** Choose a question or type a keyword to see a preset
   answer about my background and work. The conversation stays on the page
   and clears when the page is reopened or refreshed.
@@ -143,14 +143,13 @@ Vite writes the production files to `build/`.
 
 ## Deployment
 
-The starting GitHub Actions workflow is in
-`.github/workflows/deploy-gh-pages.yml`. It is configured to build the
-site when code is pushed to `main` and publish `build/` to the `gh-pages`
-branch.
+- [Live portfolio](https://jialin-tu.github.io/digital-portfolio/)
+- [GitHub repository](https://github.com/Jialin-Tu/digital-portfolio)
 
-I still need to check that the Vite base path matches the repository,
-add type checking to the workflow and confirm a successful deployment.
-I will add the repository and live site links here once verified.
+The GitHub Actions workflow runs the TypeScript check and builds the
+site when changes are pushed to `main`. If both checks pass, it
+publishes the `build/` folder to GitHub Pages. I verified the first
+successful deployment by running the workflow manually.
 
 ## Evaluation
 
