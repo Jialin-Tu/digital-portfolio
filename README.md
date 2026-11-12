@@ -177,6 +177,14 @@ the deployed site.
 - The personas are design assumptions. The walkthrough will be my own
   review of the tasks.
 
+### Local post backup and restore
+
+The Post Feed includes a JSON backup and restore feature for locally saved posts, images, comments and likes. Visitors can export a versioned backup and review the number of new and existing posts before confirming an import. Existing posts are kept, and entries with matching IDs are skipped.
+
+The importer checks the file size, application identifier, backup version, export date, post structure and duplicate post IDs before allowing a restore. Invalid files produce an explanatory message without changing saved posts. This feature supports recovery after local posts are deleted and transfer between browsers using an exported file. It does not provide cloud storage or automatic synchronisation.
+
+Manual test results and the feedback placement improvement are documented in `docs/evaluation.md`.  
+
 ## Author
 
 Jialin Tu  

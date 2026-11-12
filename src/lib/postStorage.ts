@@ -17,7 +17,7 @@ function isComment(value: unknown): value is CommentItem {
   );
 }
 
-function isPost(value: unknown): value is PostItem {
+export function isPost(value: unknown): value is PostItem {
   return (
     isRecord(value) &&
     typeof value.id === "string" &&

@@ -10,6 +10,8 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
+import { exportPostBackup, readPostBackup, mergeBackupPosts } from "../lib/postBackup";
+import type { PostBackup } from "../lib/postBackup";
 
 const MAX_IMAGE_SIZE = 500 * 1024;
 
@@ -28,6 +30,10 @@ export function PostFeed() {
   const [ready, setReady] = useState(false);
   const [notice, setNotice] = useState("");
   const [hasError, setHasError] = useState(false);
+  const [readingBackup, setReadingBackup] = useState(false);
+  const [pendingBackup, setPendingBackup] = useState<PostBackup | null>(null);
+  const backupInputRef = useRef<HTMLInputElement>(null);
+  const backupReadId = useRef(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileReadId = useRef(0);
@@ -185,6 +191,88 @@ export function PostFeed() {
     return commitPosts(updated, "Comment saved in this browser.");
   };
 
+  /** Validate a selected backup before offering to restore it. */
+const selectBackup = async (file?: File) => {
+  const readId = ++backupReadId.current;
+  setPendingBackup(null);
+  setReadingBackup(false);
+
+  if (!file) return;
+
+  setReadingBackup(true);
+  setHasError(false);
+  setNotice("");
+
+  try {
+    const backup = await readPostBackup(file);
+
+    if (backupReadId.current !== readId) return;
+
+    setPendingBackup(backup);
+  } catch (error) {
+    if (backupReadId.current !== readId) return;
+
+    setHasError(true);
+    setNotice(error instanceof Error ? error.message : "The backup could not be read.");
+  } finally {
+    if (backupReadId.current === readId) {
+      setReadingBackup(false);
+
+      if (backupInputRef.current) {
+        backupInputRef.current.value = "";
+      }
+    }
+  }
+};
+
+/** Cancel the preview without changing saved posts. */
+const cancelImport = () => {
+  backupReadId.current += 1;
+  setReadingBackup(false);
+  setPendingBackup(null);
+  setHasError(false);
+  setNotice("Import cancelled. Saved posts have not been changed.");
+
+  if (backupInputRef.current) {
+    backupInputRef.current.value = "";
+  }
+};
+
+/** Merge against the latest posts and save before updating the feed. */
+const confirmImport = () => {
+  if (!ready || !pendingBackup) return;
+
+  const updated = mergeBackupPosts(posts, pendingBackup.posts);
+  const addedCount = updated.length - posts.length;
+  const skippedCount = pendingBackup.posts.length - addedCount;
+
+  if (addedCount === 0) {
+    setPendingBackup(null);
+    setHasError(false);
+    setNotice(`No new posts to import. ${skippedCount} existing posts skipped.`);
+    return;
+  }
+
+  if (commitPosts(updated, `Imported ${addedCount} posts. ${skippedCount} existing posts skipped.`)) {
+    setPendingBackup(null);
+  }
+};
+
+const existingPostIds = new Set(posts.map((post) => post.id));
+const newPostCount = pendingBackup ? pendingBackup.posts.filter((post) => !existingPostIds.has(post.id)).length : 0;
+const skippedPostCount = pendingBackup ? pendingBackup.posts.length - newPostCount : 0;
+
+  const handleExport = () => {
+    try {
+      exportPostBackup(posts);
+      setHasError(false);
+      setNotice("Backup download requested. Check your browser downloads.");
+    } catch {
+      setHasError(true);
+      setNotice("The backup could not be created. Please try again.");
+    }
+  };
+
   const deletePost = (postId: string) => {
     if (!window.confirm("Delete this post and its comments from this browser?")) {
       return;
@@ -205,6 +293,40 @@ export function PostFeed() {
         saved only in this browser. They are not sent to me or visible
         to other visitors. Clearing browser data removes them.
       </p>
+
+      <div className="mb-6 space-y-4">
+        {notice && (
+          <div role={hasError ? "alert" : "status"} className="text-sm" style={{ padding: "12px 16px", borderRadius: "8px", border: `1px solid ${hasError ? "#b91c1c" : "#2f6469"}`, backgroundColor: hasError ? "#fef2f2" : "#f0fdfa", color: hasError ? "#991b1b" : "#134e4a", overflowWrap: "anywhere" }}>
+            <strong>{hasError ? "Action needed: " : "Update: "}</strong>
+            {notice}
+          </div>
+        )}
+        <div className="flex flex-wrap gap-3">
+          <Button type="button" variant="outline" onClick={handleExport} disabled={!ready || posts.length === 0}>Export backup</Button>
+          <Button type="button" variant="outline" onClick={() => backupInputRef.current?.click()} disabled={!ready || readingBackup}>Import backup</Button>
+        </div>
+
+        <input ref={backupInputRef} type="file" accept=".json,application/json" aria-label="Choose a portfolio backup" onChange={(event) => void selectBackup(event.target.files?.[0])} disabled={!ready || readingBackup} hidden />
+
+        <p className="text-sm text-muted-foreground">Download a backup to keep a copy of your posts, images, comments and likes. Import a portfolio backup up to 5 MB to restore missing posts in this browser.</p>
+
+        {readingBackup && <p role="status" className="text-sm">Checking backup...</p>}
+
+        {pendingBackup && (
+          <Card>
+            <CardContent className="p-6 space-y-3">
+              <h2 className="text-lg">Review backup</h2>
+              <p className="text-sm">Exported: {new Date(pendingBackup.exportedAt).toLocaleString()}</p>
+              <p className="text-sm">Posts in backup: {pendingBackup.posts.length}. New posts to import: {newPostCount}. Existing posts to skip: {skippedPostCount}.</p>
+              <p className="text-sm text-muted-foreground">Existing posts are kept. Posts with the same ID are skipped, including their comments and likes.</p>
+              <div className="flex flex-wrap gap-3">
+                <Button type="button" onClick={confirmImport} disabled={!ready}>Confirm import</Button>
+                <Button type="button" variant="outline" onClick={cancelImport}>Cancel</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       <Card className="mb-6">
         <CardContent className="p-6">
@@ -272,15 +394,6 @@ export function PostFeed() {
           </form>
         </CardContent>
       </Card>
-
-      {notice && (
-        <p
-          role={hasError ? "alert" : "status"}
-          className="text-sm mb-6"
-        >
-          {notice}
-        </p>
-      )}
 
       {ready && posts.length === 0 && (
         <p className="text-muted-foreground">

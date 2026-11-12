@@ -104,3 +104,17 @@ This was my own walkthrough using the lecturer persona.
 I blocked requests to api.github.com using Microsoft Edge developer tools. The page displayed an error message and a Try again button. After removing the block, I selected Try again and the profile and repositories loaded successfully.
 
 This check was carried out on the local website.
+
+## Small-Screen Layout Check
+
+I used Microsoft Edge device emulation with a viewport width of 390 pixels to check Home, navigation, Projects, Contact, Post Feed and GitHub. The content stayed within the viewport and the controls remained usable. I could scroll the expanded navigation menu to reach its final item.
+
+The native technology dropdown extended beyond the simulated viewport when open. After closing it, the page layout stayed within the screen. This check used desktop browser emulation. Testing on a physical phone would provide further evidence.
+
+### Local post backup and restore
+
+I tested the backup and restore feature using a local post containing text, an image, a comment and a like. Exporting produced a JSON backup. Importing it while the original post still existed showed zero new posts and one existing post to skip. Confirming the import did not create a duplicate. After deleting the original post, importing the same backup restored its text, image, comment and like. The restored content remained after refreshing the page.
+
+I also tested files with a different application identifier, an unsupported backup version, incomplete post data and invalid JSON syntax. Each file produced an explanatory error message and left the existing posts unchanged.
+
+During testing, I noticed that the feedback message appeared below the entire post form and was easy to miss. I moved it above the backup controls and added a coloured background and border. This made the result easier to notice near the import button.
