@@ -118,3 +118,23 @@ I tested the backup and restore feature using a local post containing text, an i
 I also tested files with a different application identifier, an unsupported backup version, incomplete post data and invalid JSON syntax. Each file produced an explanatory error message and left the existing posts unchanged.
 
 During testing, I noticed that the feedback message appeared below the entire post form and was easy to miss. I moved it above the backup controls and added a coloured background and border. This made the result easier to notice near the import button.
+
+## Backup Restore Code Walkthrough
+
+On 12 November 2026, I used an AI-assisted code walkthrough to trace the restore flow across `src/lib/postBackup.ts`, `src/lib/postStorage.ts` and `src/components/PostFeed.tsx`. This was a code review supported by the manual tests above, rather than a formal multi-person inspection.
+
+| Step | Code checked | Finding |
+| --- | --- | --- |
+| Read and validate | `readPostBackup` and `isPost` | The file size is checked before reading. JSON parsing, application identifier, version, export date, post fields, comments, likes and post IDs are checked before a preview is accepted. |
+| Preview | `selectBackup` | A valid backup is stored in `pendingBackup`. This step does not call `savePosts` or update the saved feed. |
+| Cancel | `cancelImport` | The pending backup is cleared without writing posts. |
+| Merge | `confirmImport` and `mergeBackupPosts` | Confirmation merges against the current feed. Existing IDs are skipped, new entries are added and posts are sorted by creation date. |
+| Save | `commitPosts` and `savePosts` | Browser storage is written before Redux is updated. A storage exception enters the error handler before the feed update. |
+
+I traced two examples: one existing post plus a backup with the same ID leaves one post; an empty feed plus the same backup restores one post. Invalid files stop before the preview and save stages. These traces agree with the manual results recorded above.
+
+The review checks control flow, but it does not replace running failure tests. Storage-full errors, files over the size limit, invalid export dates and duplicate IDs within a backup have not yet been tested manually. The current image check accepts a string; it does not verify the image encoding or restrict imported image URLs.
+
+## Published Backup Feature Check
+
+Commit `e095f0f` triggered GitHub Actions run 5, which completed successfully in 42 seconds. On the published site, I confirmed that backup import, preview and restoration worked and that an invalid JSON file displayed an error near the backup controls. Localhost and GitHub Pages use separate browser storage, so the exported backup was used to transfer the test post to the published site.
